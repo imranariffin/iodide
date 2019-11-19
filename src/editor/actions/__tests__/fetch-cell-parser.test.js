@@ -229,8 +229,8 @@ const invalidFetchLines = [
   {
     line: "js: js: https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js",
     result: {
-      error: "INVALID_FETCH_SYNTAX",
-      errorMessage: `Fetch "js: js: https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js" is not valid`
+      error: "INVALID_FETCH_URL",
+      errorMessage: `Url "js: https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js" is invalid`
     }
   }
 ];

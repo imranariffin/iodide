@@ -49,10 +49,6 @@ export function emptyLine(line) {
   return line.replace(/\s+/g, "") === "";
 }
 
-export function isLineNotValidFetchSyntax(line) {
-  return line !== "";
-}
-
 export function parseFetchCellLine(line) {
   // intitial sketch of syntax at:
   // https://github.com/iodide-project/iodide/issues/1009
@@ -65,13 +61,15 @@ export function parseFetchCellLine(line) {
   if (emptyLine(line)) return undefined;
   if (commentOnlyLine(line)) return undefined;
 
-  const [fetchType, fetchContent] = line.trim().split(": "); // .map(s => s.)
+  const [fetchType, fetchContent, ...remaining] = line.trim().split(": "); // .map(s => s.)
 
-  if (isLineNotValidFetchSyntax(fetchContent)) {
+  if (isNotValidUrl(fetchContent) && remaining.length > 0) {
     return {
-      error: "INVALID_FETCH_SYNTAX",
-      errorMessage: `Fetch "${line}" is not valid`
-    };
+      error: "INVALID_FETCH_URL",
+      errorMessage: `Url "${fetchContent + remaining.join()}" is not valid`
+    }
+  } else if (isNotValidUrl(fetchContent)) {
+    return { error: "INVALID_FETCH_URL" }
   }
 
   if (fetchContent) {
