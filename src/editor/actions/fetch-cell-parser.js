@@ -61,7 +61,17 @@ export function parseFetchCellLine(line) {
   if (emptyLine(line)) return undefined;
   if (commentOnlyLine(line)) return undefined;
 
-  const [fetchType, fetchContent] = line.trim().split(": "); // .map(s => s.)
+  const [fetchType, fetchContent, ...remaining] = line.trim().split(": "); // .map(s => s.)
+
+  if (isNotValidUrl(fetchContent) && remaining.length > 0) {
+    return {
+      error: "INVALID_FETCH_URL",
+      errorMessage: `Url "${fetchContent + remaining.join()}" is not valid`
+    }
+  } else if (isNotValidUrl(fetchContent)) {
+    return { error: "INVALID_FETCH_URL" }
+  }
+
   if (fetchContent) {
     // this switch is only entered if the line contains ': ', in which case
     // fetchContent is defined

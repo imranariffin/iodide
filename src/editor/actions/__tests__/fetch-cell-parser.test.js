@@ -225,6 +225,13 @@ const invalidFetchLines = [
   {
     line: "blob: 1234567890 = https://iodide.io/data/foo.csv",
     result: { error: "INVALID_VARIABLE_NAME" }
+  },
+  {
+    line: "js: js: https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js",
+    result: {
+      error: "INVALID_FETCH_URL",
+      errorMessage: `Url "js: https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js" is invalid`
+    }
   }
 ];
 
