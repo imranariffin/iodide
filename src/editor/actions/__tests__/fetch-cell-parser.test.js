@@ -2,6 +2,7 @@ import parseFetchCell, {
   parseFetchCellLine,
   commentOnlyLine,
   emptyLine,
+  validSyntaxFetchLine,
   parseAssignmentCommand
 } from "../fetch-cell-parser";
 
@@ -53,6 +54,47 @@ describe("correctly identify when a line IS NOT a emptyLine", () => {
   lines.forEach(testCase => {
     it(`is NOT a emptyLine: "${testCase}"`, () => {
       expect(emptyLine(testCase)).toEqual(false);
+    });
+  });
+});
+
+describe("correctly identify when a line IS a valid fetch line", () => {
+  const lines = [
+    "js: https://host.com/file.js",
+    "js: http://host.com/file.js",
+    "js: varname = https://host.com/file.js // some comment",
+    "text: varname = https://host.com/file.txt // some comment",
+    "text:   foo =   https://d3js.org/d3.v5.min.js //comment",
+    "js: https://d3js.org/d3.v5.min.js //comment",
+    "text:   $fo_o    =   /d3js.org/d3.v5.min.js //comment",
+    "text:   ಠ_ಠ =   https://d3js.org/d3.v5.min.js //comment",
+    "json:   test =   https://d3js.org/d3.v5.min.js //comment",
+    "json:   test =   https://d3js.org/d3.v5.min.js //comment",
+    "blob:   test =  https://d3js.org/d3.v5.min.js //comment"
+  ];
+  lines.forEach(testCase => {
+    it(`is a valid fetch line: "${testCase}"`, () => {
+      expect(validSyntaxFetchLine(testCase)).toEqual(true);
+    });
+  });
+});
+
+describe("correctly identify when a line IS NOT a valid fetch line", () => {
+  const lines = [
+    "just made up irrelevant text",
+    "image: just made up irrelevant text",
+    "js : just made up irrelevant text",
+    "js:= https://valid-url.com/foo.csv",
+    "js := https://valid-url.com/foo.csv",
+    "js: valid_varname := https://valid-url.com/foo.csv",
+    "js valid_varname = https://valid-url.com/foo.csv",
+    "js:: valid_varname = https://valid-url.com/foo.csv",
+    "js:: https://valid-url.com/foo.csv",
+    "js: js: valid_varname = https://valid-url.com/foo.csv",
+  ];
+  lines.forEach(testCase => {
+    it(`is not a valid fetch line: "${testCase}"`, () => {
+      expect(validSyntaxFetchLine(testCase)).toEqual(false);
     });
   });
 });
@@ -189,6 +231,14 @@ const validFetchLines = [
       filePath: "https://d3js.org/d3.v5.min.js",
       isRelPath: false
     }
+  },
+  {
+    line: "css:    https://d3js.org/styles.css // comment",
+    result: {
+      fetchType: "css",
+      filePath: "https://d3js.org/styles.css",
+      isRelPath: false
+    }
   }
 ];
 describe("return valid results for valid fetch lines", () => {
@@ -225,6 +275,46 @@ const invalidFetchLines = [
   {
     line: "blob: 1234567890 = https://iodide.io/data/foo.csv",
     result: { error: "INVALID_VARIABLE_NAME" }
+  },
+  {
+    line: "unknownfetchtype: valid_varname = https://valid-url.com/foo.csv",
+    result: { error: "INVALID_FETCH_TYPE" }
+  },
+  {
+    line: "js: js: valid_varname = https://valid-url.com/foo.csv",
+    result: { error: "INVALID_FETCH_TYPE" }
+  },
+  {
+    line: ": valid_varname = https://valid-url.com/foo.csv",
+    result: { error: "MISSING_FETCH_TYPE" }
+  },
+  {
+    line: ": https://valid-url.com/foo.csv",
+    result: { error: "MISSING_FETCH_TYPE" }
+  },
+  {
+    line: "js: ",
+    result: { error: "MISSING_FETCH_URL" }
+  },
+  {
+    line: "js: var_name = ",
+    result: { error: "MISSING_FETCH_URL" }
+  },
+  {
+    line: "js: = https://valid-url.com/foo.csv",
+    result: { error: "INVALID_FETCH_SYNTAX" }
+  },
+  {
+    line: "js: var_name https://valid-url.com/foo.csv",
+    result: { error: "INVALID_FETCH_SYNTAX" }
+  },
+  {
+    line: "js: var_name := https://valid-url.com/foo.csv",
+    result: { error: "INVALID_FETCH_SYNTAX" }
+  },
+  {
+    line: "js:= https://valid-url.com/foo.csv",
+    result: { error: "INVALID_FETCH_SYNTAX" }
   }
 ];
 

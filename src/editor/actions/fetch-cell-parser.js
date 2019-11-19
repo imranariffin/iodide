@@ -49,6 +49,17 @@ export function emptyLine(line) {
   return line.replace(/\s+/g, "") === "";
 }
 
+export function validSyntaxFetchLine(line) {
+  const lineWithoutComment = line.trim().split("//")[0].trim();
+  if (lineWithoutComment.match(/^[a-z]*: \s*[^\s]+\s*\=\s*[^\s]*$/)) {
+    return true
+  }
+  if (lineWithoutComment.match(/^[a-z]*: \s*[^\s]*$/)) {
+    return true
+  }
+  return false
+}
+
 export function parseFetchCellLine(line) {
   // intitial sketch of syntax at:
   // https://github.com/iodide-project/iodide/issues/1009
@@ -62,34 +73,42 @@ export function parseFetchCellLine(line) {
   if (commentOnlyLine(line)) return undefined;
 
   const [fetchType, fetchContent] = line.trim().split(": "); // .map(s => s.)
-  if (fetchContent) {
-    // this switch is only entered if the line contains ': ', in which case
-    // fetchContent is defined
 
-    // first, strip out comment from the end of line (if it exists)
-    const fetchCommand = fetchContent
-      .trim()
-      .split(" //")[0]
-      .trim();
-    switch (fetchType) {
-      case "text":
-      case "json":
-      case "arrayBuffer":
-      case "blob":
-        return Object.assign(
-          {},
-          { fetchType },
-          parseAssignmentCommand(fetchCommand)
-        );
-      case "js":
-      case "css":
-      case "plugin":
-        return Object.assign({}, { fetchType }, parseFileLine(fetchCommand));
-      default:
-        return { error: "INVALID_FETCH_TYPE" };
-    }
+  if (!fetchType || !fetchType.trim()) {
+    return { error: "MISSING_FETCH_TYPE" };
   }
-  return { error: "MISSING_FETCH_TYPE" };
+  if (!fetchContent || !fetchContent.trim()) {
+    return { error: "MISSING_FETCH_URL" };
+  }
+  if (!validSyntaxFetchLine(line)) {
+    return { error: "INVALID_FETCH_SYNTAX" };
+  }
+
+  // this switch is only entered if the line contains ': ', in which case
+  // fetchContent is defined
+
+  // first, strip out comment from the end of line (if it exists)
+  const fetchCommand = fetchContent
+    .trim()
+    .split(" //")[0]
+    .trim();
+  switch (fetchType) {
+    case "text":
+    case "json":
+    case "arrayBuffer":
+    case "blob":
+      return Object.assign(
+        {},
+        { fetchType },
+        parseAssignmentCommand(fetchCommand)
+      );
+    case "js":
+    case "css":
+    case "plugin":
+      return Object.assign({}, { fetchType }, parseFileLine(fetchCommand));
+    default:
+      return { error: "INVALID_FETCH_TYPE" };
+  }
 }
 
 export default function parseFetchCell(cellText) {
