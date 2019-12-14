@@ -1,11 +1,15 @@
 export const simpleTypes = {
   number_int: 232937,
-  number_float: 453.12312312,
+  number_float: 54321.123456789,
   number_zero: 0,
   number_negative: -534.23,
   number_exp: 10e55,
   number_nan: NaN,
   number_inf: Infinity,
+  number_long_big: 1234567891011121314e100,
+  number_long_big_neg: -1234567891011121314e100,
+  number_long_tiny: 1234567891011121314e-100,
+  number_long_tiny_neg: -1234567891011121314e-100,
   // bigint: BigInt(9007199254740991), bigint not yet available in node?
   string_empty: "",
   string_short: "asjhdflkdskfhla",
@@ -140,7 +144,11 @@ export const baseObjects = {
   date: new Date("2000-01-01"),
   regex: /^.*$/,
   regex_long: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-  map: new Map([[1, "one"], [2, "two"], [3, "three"]]),
+  map: new Map([
+    [1, "one"],
+    [2, "two"],
+    [3, "three"]
+  ]),
   map_big: new Map([
     [1, "one"],
     [2, "two"],
@@ -321,7 +329,10 @@ if (window.document !== undefined) {
 // ==================== Promise
 
 export const promiseCases = {
-  promise: new Promise(() => "resolve", () => "reject"),
+  promise: new Promise(
+    () => "resolve",
+    () => "reject"
+  ),
   // this causes problems with node that show up in jest when testing
   // see: https://github.com/facebook/jest/issues/5311
   // uncomment this for storybook testing, but be sure to comment it
